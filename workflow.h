@@ -8,7 +8,7 @@
 #include <list>
 #include <unordered_map>
 #include <map>
-enum Worker_ID { ReadFile_ID=0, Writefile_ID, Grep_ID, Sort_ID, Replace_ID, Dump_ID};
+enum Worker_ID { ReadFile_ID=0, Writefile_ID, Grep_ID, Sort_ID, Replace_ID, Dump_ID, Count_ID};
 
 using namespace std;
 
@@ -19,7 +19,7 @@ using namespace std;
 class ConfigReader{
 private:
     string workers, args;
-    int id;
+    int id{};
     list<pair<string, string>> priority;
     map<int, pair<string, string>> jobs;
     ifstream file;
@@ -35,7 +35,7 @@ private:
 
     void read_csed();
 public:
-    ConfigReader(const string& filename);
+    explicit ConfigReader(const string& filename);
 
 
     list<pair<string, string>> read_config();
@@ -63,10 +63,10 @@ private:
     ifstream file;
     void parse_args() override;
 public:
-     ReadFile(const string& arguments);
+     explicit ReadFile(const string& arguments);
 
 
-    void do_work(vector<string> txt=vector<string>()) override;
+    void do_work(vector<string> txt) override;
 
 
     vector<string> get_result() override;
@@ -79,7 +79,7 @@ private:
     ofstream file;
     void parse_args() override;
 public:
-    WriteFile(const string& arguments);
+    explicit WriteFile(const string& arguments);
 
 
 
@@ -96,7 +96,7 @@ private:
     string word;
     void parse_args() override;
 public:
-    Grep(const string& arguments);
+    explicit Grep(const string& arguments);
 
     void do_work(vector<string> txt) override;
 
@@ -117,7 +117,7 @@ private:
 
     void parse_args() override;
 public:
-    Sort(const string& args);
+    explicit Sort(const string& args);
     void do_work(vector<string> txt) override;
 
 
@@ -141,7 +141,7 @@ private:
 
     void parse_args() override;
 public:
-    Replace(const string& arguments);
+    explicit Replace(const string& arguments);
 
 
 
@@ -160,7 +160,7 @@ private:
 
     void parse_args() override;
 public:
-    Dump(const string& arguments);
+    explicit Dump(const string& arguments);
 
 
 
@@ -173,16 +173,39 @@ public:
 };
 
 
+class Count : public IWorker{
+private:
+    int amount;
+    vector<string> words;
+    string word;
+
+
+    void get_words(const string& str);
+
+
+    void parse_args() override;
+
+public:
+    explicit Count(const string& args);
+
+
+    void do_work(vector<string> txt) override;
+
+
+    vector<string> get_result() override;
+};
+
+
 class WorkflowExecutor{
 private:
-    IWorker* worker;
+    IWorker* worker{};
     list<pair<string, string>> priority;
     string filename;
     vector<string> text;
 
     void parse_config();
 public:
-    WorkflowExecutor(const string& file);
+    explicit WorkflowExecutor(const string& file);
 
 
     void execute();

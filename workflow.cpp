@@ -1,9 +1,8 @@
 #include "workflow.h"
 #include <iostream>
-#include <utility>
 unordered_map<string, int> worker_names({{"readfile", ReadFile_ID}, {"writefile", Writefile_ID},
                                          {"grep", Grep_ID}, {"sort", Sort_ID}, {"replace", Replace_ID},
-                                         {"dump", Dump_ID}
+                                         {"dump", Dump_ID}, {"count", Count_ID}
                                         });
 
 IWorker* IWorker::createWorker(const string& Worker_name, const string& arguments) {
@@ -27,6 +26,8 @@ IWorker* IWorker::createWorker(const string& Worker_name, const string& argument
         case Dump_ID:
             p = new Dump(arguments);
             break;
+        case Count_ID:
+            p = new Count(arguments);
     }
     return p;
 }
@@ -178,7 +179,7 @@ vector<string> WriteFile::get_result() {
 
 void WriteFile::parse_args(){
     string filename = args[0];
-    file.open(filename, ofstream::out);
+    file.open(filename);
     if(!file){
         throw runtime_error("fuck");
     }
@@ -188,6 +189,7 @@ void WriteFile::parse_args(){
 void WriteFile::do_work(vector<string> txt){
     parse_args();
     for (const auto& it : txt){
+        cout << it;
         file << it;
     }
 }
@@ -241,8 +243,9 @@ void Sort::parse_args() {}
 
 void Sort::get_words(const string& str){
     string got_word;
+    string new_str = str + " ";
 
-    for(char it : str){
+    for(char it : new_str){
         if(it != ' ' && it!= '\n'){
             got_word += it;
         }
@@ -271,10 +274,13 @@ void Sort::do_work(vector<string> txt) {
     for(const auto& it : txt){
         get_words(it);
     }
+    if(words.size() == 1){
+        text = txt;
+        return;
+    }
     words.sort(size_comp);
     for(const auto& it : words){
-
-        text.push_back(it );
+        text.push_back(it);
     }
 }
 
@@ -376,6 +382,52 @@ void Dump::do_work(vector<string> txt) {
 vector<string> Dump::get_result() {
     return text;
 }
+
+Count::Count(const string& arguments) {
+    args.push_back(arguments);
+    amount = 0;
+}
+
+
+void Count::parse_args() {
+    word = args[0];
+}
+
+
+void Count::get_words(const string &str) {
+    string got_word;
+
+    for(char it : str){
+        if(it != ' ' && it!= '\n'){
+            got_word += it;
+        }
+        else{
+            words.push_back(got_word);
+            got_word = "";
+        }
+    }
+}
+
+
+void Count::do_work(vector<string> txt) {
+    parse_args();
+    for (const auto& it : txt){
+        get_words(it);
+    }
+    for (const auto& it : words){
+        if (it == word){
+            amount++;
+        }
+    }
+}
+
+
+vector<string> Count::get_result() {
+    string s = to_string(amount);
+    text.push_back(s);
+    return text;
+}
+
 
 WorkflowExecutor::WorkflowExecutor(const string& file) {
     filename = file;

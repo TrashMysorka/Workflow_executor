@@ -11,7 +11,11 @@ using namespace std;
 
 
 int main() {
-    WorkflowExecutor w("config.txt");
-    w.execute();
+    vector<string> h (3, "lololololol \n");
+
+    //IWorker* w = IWorker::createWorker("writefile", "output.txt");
+    //(*w).do_work(h);
+    WorkflowExecutor w1("config.txt");
+    w1.execute();
     return 0;
 }
