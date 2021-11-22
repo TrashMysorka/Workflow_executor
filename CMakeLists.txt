@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 
-add_executable(workflow_factory main.cpp workflow.h workflow.cpp)
-add_executable(CMakeTest Workflowtest.cpp workflow.h workflow.cpp)
+add_executable(workflow_factory main.cpp  Source/Blocks/WriteFile.cpp Source/Blocks/WriteFile.h Source/Blocks/ReadFile.cpp Source/Blocks/ReadFile.h Source/Blocks/Grep.cpp Source/Blocks/Grep.h Source/Blocks/Dump.cpp Source/Blocks/Dump.h Source/Blocks/Sort.cpp Source/Blocks/Sort.h Source/Blocks/Replace.cpp Source/Blocks/Replace.h Source/Blocks/Count.cpp Source/Blocks/Count.h Source/Blocks/IWorker.cpp Source/Blocks/IWorker.h Source/ConfigReader.cpp Source/ConfigReader.h Source/WorkflowExecutor.cpp Source/WorkflowExecutor.h Source/Blocks/Factory.cpp Source/Blocks/Factory.h)
+add_executable(CMakeTest Workflowtest.cpp)
 
 target_link_libraries(CMakeTest gtest_main)
