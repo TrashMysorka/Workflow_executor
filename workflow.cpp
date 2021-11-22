@@ -1,13 +1,31 @@
 #include "workflow.h"
 #include <iostream>
+class WorkerFindException : public std::exception
+{
+    const char * what () const throw ()
+    {
+        return "This block doesn't exist";
+    }
+};
+
+
+class FileError : public std::exception
+{
+    const char * what () const throw ()
+    {
+        return "File is not opened";
+    }
+};
+
+
 unordered_map<string, int> worker_names({{"readfile", ReadFile_ID}, {"writefile", Writefile_ID},
                                          {"grep", Grep_ID}, {"sort", Sort_ID}, {"replace", Replace_ID},
                                          {"dump", Dump_ID}, {"count", Count_ID}
                                         });
 
-IWorker* IWorker::createWorker(const string& Worker_name, const string& arguments) {
+IWorker* IWorker::createWorker(const string& worker_name, const string& arguments) {
     IWorker* p;
-    switch(worker_names[Worker_name]){
+    switch(worker_names[worker_name]){
         case ReadFile_ID:
             p = new ReadFile(arguments);
             break;
@@ -28,6 +46,9 @@ IWorker* IWorker::createWorker(const string& Worker_name, const string& argument
             break;
         case Count_ID:
             p = new Count(arguments);
+        default:
+            throw WorkerFindException();
+
     }
     return p;
 }
@@ -35,6 +56,7 @@ IWorker* IWorker::createWorker(const string& Worker_name, const string& argument
 
 ConfigReader::ConfigReader(const string& filename) {
     file.open(filename, ifstream::in);
+    if (!file.is_open()) throw FileError();
 }
 
 
@@ -134,7 +156,7 @@ void ReadFile::parse_args(){
     string filename = args[0];
     file.open(filename, ifstream::in);
     if(!file){
-        throw exception();
+        throw FileError();
     }
 }
 
@@ -142,23 +164,17 @@ void ReadFile::parse_args(){
 void ReadFile::do_work(vector<string> txt){
     parse_args();
     string str;
-    if(!file){
-
-    }
     while(!file.eof() && file){
         getline(file, str);
         if (!str.empty()){
-            //cout << "str = " << str << endl;
             str += '\n';
             text.push_back(str);
-            //cout << text[0];
         }
     }
 }
 
 
 vector<string> ReadFile::get_result(){
-   // cout << text[1];
     return text;
 }
 
@@ -181,7 +197,7 @@ void WriteFile::parse_args(){
     string filename = args[0];
     file.open(filename);
     if(!file){
-        throw runtime_error("fuck");
+        throw FileError();
     }
 }
 
@@ -367,6 +383,7 @@ Dump::Dump(const string& arguments) {
 void Dump::parse_args() {
     string filename = args[0];
     file.open(filename, ofstream::out);
+    if(!file.is_open()) throw FileError();
 }
 
 
